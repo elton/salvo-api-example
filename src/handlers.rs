@@ -1,7 +1,8 @@
 // API handlers
 use salvo::prelude::*;
 
-use crate::schema::User;
+use crate::schema::resp::ResponseData;
+use crate::schema::user::User;
 
 #[handler]
 pub async fn index() -> Result<&'static str, ()> {
@@ -24,8 +25,17 @@ pub async fn get_query(req: &mut Request) -> Result<String, ()> {
 }
 
 #[handler]
-pub async fn create_user(req: &mut Request) -> Result<&'static str, ()> {
+pub async fn create_user(req: &mut Request, res: &mut Response) {
+    // 将POST请求的body转换为User结构体
     let user = req.parse_json::<User>().await.unwrap();
     tracing::debug!("create user: {:?}", user);
-    Ok("create user")
+
+    let resp = ResponseData {
+        success: true,
+        message: "create user success".to_string(),
+        error_code: None,
+        data: Some(user),
+    };
+
+    res.render(Json(resp))
 }
